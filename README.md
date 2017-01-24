@@ -1,2 +1,2 @@
 # CS585
-CS585 Natural Language Processing @ IIT
+Dr.Culotta's CS585 Natural Language Processing @ IIT
