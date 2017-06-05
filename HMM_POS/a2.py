@@ -225,7 +225,29 @@ def read_labeled_data(filename):
 	  tags........a lists of lists of strings, representing the POS tags for each sentence.
 	"""
 	###TODO
-	pass
+	sentences = []
+	sent_tags = []
+	
+	with open(filename, 'r') as file:
+		words = []
+		word_tags = []
+		for line in file:			
+			if line != '\n':
+				word_pos = line.split()
+				word = word_pos[0]
+				pos  = word_pos[1]	
+				
+				words.append(word)
+				word_tags.append(pos)
+			else:
+				sentences.append(words)
+				sent_tags.append(word_tags)
+				
+				words = []
+				word_tags = []
+	
+	return sentences, sent_tags
+					
 
 def download_data():
     """ Download labeled data.
