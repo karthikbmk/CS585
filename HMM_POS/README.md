@@ -1,4 +1,2 @@
-### A2
-
-See a2.py for instructions.
+### Part of Speech Tagger using Hidden Markov Model
 
