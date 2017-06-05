@@ -41,8 +41,35 @@ class HMM:
 			None
 		"""
 		###TODO
-		pass
+		self.transition_probas = defaultdict(lambda : defaultdict(float))
+		tag_freqs = defaultdict(lambda : 0)
+		
+		tag_set = set()
+		for sent_tags in tags:
+			for idx,tag in enumerate(sent_tags):
+				
+				tag_set.add(tag)
+				
+				if idx < len(sent_tags) - 1:
+					tag_freqs[tag] += 1
+				
+				if idx > 0:
+					self.transition_probas[sent_tags[idx-1]][sent_tags[idx]] += 1
+		
+		N = len(tag_set)
+		nr = 0
+		dr = 0
+		
+		if self.smoothing > 0:
+			nr = 1
+			dr = N*self.smoothing
 
+		for tag1 in tag_set:
+			for tag2 in tag_set:
+				self.transition_probas[tag1][tag2] += nr
+				self.transition_probas[tag1][tag2] /= (tag_freqs[tag1] + dr)
+
+				
 	def fit_emission_probas(self, sentences, tags):
 		"""
 		Estimate the HMM emission probabilities from the provided data. 
@@ -99,7 +126,7 @@ class HMM:
 			None		  
 
 		DONE. This just calls the three fit_ methods above.
-		"""
+		"""		
 		self.fit_transition_probas(tags)
 		self.fit_emission_probas(sentences, tags)
 		self.fit_start_probas(tags)
