@@ -143,8 +143,30 @@ class HMM:
 		See test_hmm_fit_start
 		"""
 		###TODO
-		pass
+		self.start_probas = defaultdict(lambda : 0.0)
+		tag_set = set()
+		
+		for tag_lst in tags:
+			for idx, tag in enumerate(tag_lst):
+				tag_set.add(tag)
+				
+				if idx == 0:
+					self.start_probas[tag] += 1
+		
+		dr_lhs = len(tags)
 
+		N = len(tag_set)
+		nr = 0
+		dr = 0
+		
+		if self.smoothing > 0:
+			nr = 1
+			dr = N*self.smoothing		
+		
+		for tag in tag_set:
+			self.start_probas[tag] += nr
+			self.start_probas[tag] /= (dr_lhs + dr)
+			
 	def fit(self, sentences, tags):
 		"""
 		Fit the parameters of this HMM from the provided data.

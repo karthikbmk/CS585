@@ -44,7 +44,7 @@ class TestA2(unittest.TestCase):
 
 	def test_hmm_fit_emission_smoothed(self):
 		"""Test supervised HMM learning emission probabilities.
-		"""
+		"""		
 		model = HMM(smoothing=1)
 		model.fit(test_sentences, test_tags)
 		self.assertEqual(0.4, round(model.emission_probas['D']['the'], 1))
