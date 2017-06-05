@@ -90,7 +90,37 @@ class HMM:
 		See test_hmm_fit_emission.
 		"""
 		###TODO
-		pass
+		self.emission_probas = defaultdict(lambda : defaultdict(float))
+		tag_freqs = defaultdict(lambda : 0.0)
+		tag_set = set()
+		word_set = set()
+		
+		for sent_tag_tup in zip(sentences,tags):
+			sentence = sent_tag_tup[0]
+			tag_lst  = sent_tag_tup[1]
+			
+			for word_tag_tup in zip(sentence,tag_lst):
+				word = word_tag_tup[0]
+				tag = word_tag_tup[1]				
+				word_set.add(word)
+				tag_set.add(tag)
+				tag_freqs[tag] += 1
+				
+				self.emission_probas[tag][word] += 1
+		
+		N = len(word_set)
+		nr = 0
+		dr = 0
+		
+		if self.smoothing > 0:
+			nr = 1
+			dr = N*self.smoothing
+			
+		for word in word_set:
+			for tag in tag_set:
+				self.emission_probas[tag][word] += nr
+				self.emission_probas[tag][word] /= (tag_freqs[tag] + dr)
+
 
 	def fit_start_probas(self, tags):
 		"""
