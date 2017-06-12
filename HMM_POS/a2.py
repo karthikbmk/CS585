@@ -144,18 +144,18 @@ class HMM:
 		"""
 		###TODO
 		self.start_probas = defaultdict(lambda : 0.0)
-		tag_set = set()
+		self.tag_set = set()		
 		
 		for tag_lst in tags:
 			for idx, tag in enumerate(tag_lst):
-				tag_set.add(tag)
+				self.tag_set.add(tag)
 				
 				if idx == 0:
 					self.start_probas[tag] += 1
 		
 		dr_lhs = len(tags)
 
-		N = len(tag_set)
+		N = len(self.tag_set)
 		nr = 0
 		dr = 0
 		
@@ -163,9 +163,11 @@ class HMM:
 			nr = 1
 			dr = N*self.smoothing		
 		
-		for tag in tag_set:
+		for tag in self.tag_set:
 			self.start_probas[tag] += nr
 			self.start_probas[tag] /= (dr_lhs + dr)
+			
+		self.states = list(self.tag_set)
 			
 	def fit(self, sentences, tags):
 		"""
@@ -197,8 +199,45 @@ class HMM:
 		  		  this sentence.
 		  proba...a float indicating the probability of this path.
 		"""
-		###TODO
-		pass
+		###TODO		
+		word_cnt = len(sentence)
+		tag_cnt  = len(self.states)
+		
+		#Specify size
+		viterbi = np.zeros((tag_cnt, word_cnt))
+		back_ptr = np.zeros((tag_cnt, word_cnt))
+		
+		#Init
+		q_map = defaultdict(str)
+		for id, state in enumerate(self.states):
+			q_map[id] = state
+		
+		o_map = defaultdict(str)
+		for id, word in enumerate(sentence):
+			o_map[id] = word		
+		
+		#Recurse
+		for i in range(viterbi.shape[0]):
+			viterbi[i,0] = self.start_probas[q_map[i]] * self.emission_probas[q_map[i]][o_map[0]]
+			back_ptr[i,0] = 0
+		
+		cols = viterbi.shape[1]
+		rows = viterbi.shape[0]
+		for o_id in range(1,cols):
+			for q_id in range(0,rows):
+				max = -99999
+				for  i in range(0,rows):
+					cur = viterbi[i,o_id-1]*self.transition_probas[q_map[i]][q_map[q_id]]*self.emission_probas[q_map[q_id]][o_map[o_id]]					
+					if max < cur:
+						max = cur
+						b_ptr = i
+				viterbi[q_id,o_id] = max
+				back_ptr[q_id,o_id] = b_ptr
+		
+		print (viterbi, back_ptr)
+				
+		
+		
 
 
 def read_labeled_data(filename):
