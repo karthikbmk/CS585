@@ -11,7 +11,6 @@ import numpy as np
 import os.path
 import urllib.request
 
-
 class HMM:
 	def __init__(self, smoothing=0):
 		"""
@@ -167,7 +166,7 @@ class HMM:
 			self.start_probas[tag] += nr
 			self.start_probas[tag] /= (dr_lhs + dr)
 			
-		self.states = list(self.tag_set)
+		self.states = sorted(list(self.tag_set))
 			
 	def fit(self, sentences, tags):
 		"""
@@ -205,7 +204,7 @@ class HMM:
 		
 		#Specify size
 		viterbi = np.zeros((tag_cnt, word_cnt))
-		back_ptr = np.zeros((tag_cnt, word_cnt))
+		back_ptr = np.zeros((tag_cnt, word_cnt),dtype=int)
 		
 		#Init
 		q_map = defaultdict(str)
@@ -221,6 +220,7 @@ class HMM:
 			viterbi[i,0] = self.start_probas[q_map[i]] * self.emission_probas[q_map[i]][o_map[0]]
 			back_ptr[i,0] = 0
 		
+		
 		cols = viterbi.shape[1]
 		rows = viterbi.shape[0]
 		for o_id in range(1,cols):
@@ -234,11 +234,23 @@ class HMM:
 				viterbi[q_id,o_id] = max
 				back_ptr[q_id,o_id] = b_ptr
 		
-		print (viterbi, back_ptr)
-				
+		#Best_path_prob
+		max_prob = np.max((viterbi[:,viterbi.shape[1]-1,]))
+		max_prob_idx = np.argmax(viterbi[:,viterbi.shape[1]-1,])
 		
 		
-
+		path = []
+		path.append(q_map[max_prob_idx])
+		
+		col_cnt = viterbi.shape[1]
+		for i in list(range(col_cnt))[0:col_cnt-1]:			
+			col = back_ptr[:,col_cnt-(i+1):col_cnt-i]
+			path.append(q_map[col[max_prob_idx][0]])
+			max_prob_idx = col[max_prob_idx][0]
+		
+		print (viterbi, '\n\n', back_ptr)
+		return path[::-1], max_prob									 		
+		
 
 def read_labeled_data(filename):
 	"""
@@ -310,7 +322,7 @@ if __name__ == '__main__':
         ['$', "''", ',', '.', ':', 'CC', 'CD', 'DT', 'EX', 'IN', 'JJ', 'JJR', 'JJS', 'MD', 'NN', 'NNP', 'NNPS', 'NNS', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'TO', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WRB', '``']
 	predicted parts of speech for the sentence ['Look', 'at', 'what', 'happened']
 	(['VB', 'IN', 'WP', 'VBD'], 2.751820088075314e-10)
-	"""
+	"""	
 	fname = 'data.txt'
 	if not os.path.isfile(fname):
 		download_data()
