@@ -59,8 +59,9 @@ class HMM:
 		nr = 0
 		dr = 0
 		
+        #This is unnecessary...anyways..fuck it
 		if self.smoothing > 0:
-			nr = 1
+			nr = self.smoothing		
 			dr = N*self.smoothing
 
 		for tag1 in tag_set:
@@ -89,6 +90,7 @@ class HMM:
 		See test_hmm_fit_emission.
 		"""
 		###TODO
+		
 		self.emission_probas = defaultdict(lambda : defaultdict(float))
 		tag_freqs = defaultdict(lambda : 0.0)
 		tag_set = set()
@@ -112,14 +114,14 @@ class HMM:
 		dr = 0
 		
 		if self.smoothing > 0:
-			nr = 1
+			nr = self.smoothing		
 			dr = N*self.smoothing
 			
 		for word in word_set:
 			for tag in tag_set:
 				self.emission_probas[tag][word] += nr
 				self.emission_probas[tag][word] /= (tag_freqs[tag] + dr)
-
+		
 
 	def fit_start_probas(self, tags):
 		"""
@@ -142,6 +144,7 @@ class HMM:
 		See test_hmm_fit_start
 		"""
 		###TODO
+		
 		self.start_probas = defaultdict(lambda : 0.0)
 		self.tag_set = set()		
 		
@@ -159,15 +162,15 @@ class HMM:
 		dr = 0
 		
 		if self.smoothing > 0:
-			nr = 1
+			nr = self.smoothing		
 			dr = N*self.smoothing		
 		
 		for tag in self.tag_set:
 			self.start_probas[tag] += nr
 			self.start_probas[tag] /= (dr_lhs + dr)
 			
-		self.states = sorted(list(self.tag_set))
-			
+		self.states = sorted(list(self.tag_set))		
+		
 	def fit(self, sentences, tags):
 		"""
 		Fit the parameters of this HMM from the provided data.
@@ -199,6 +202,7 @@ class HMM:
 		  proba...a float indicating the probability of this path.
 		"""
 		###TODO		
+		
 		word_cnt = len(sentence)
 		tag_cnt  = len(self.states)
 		
@@ -248,8 +252,8 @@ class HMM:
 			path.append(q_map[col[max_prob_idx][0]])
 			max_prob_idx = col[max_prob_idx][0]
 		
-		print (viterbi, '\n\n', back_ptr)
-		return path[::-1], max_prob									 		
+		print (viterbi)
+		return path[::-1], max_prob								 		
 		
 
 def read_labeled_data(filename):
@@ -276,15 +280,16 @@ def read_labeled_data(filename):
 	  tags........a lists of lists of strings, representing the POS tags for each sentence.
 	"""
 	###TODO
+    
 	sentences = []
 	sent_tags = []
 	
-	with open(filename, 'r') as file:
+	with open(filename,'r') as file:
 		words = []
 		word_tags = []
 		for line in file:			
 			if line != '\n':
-				word_pos = line.split()
+				word_pos = line.strip('\n').split(' ')
 				word = word_pos[0]
 				pos  = word_pos[1]	
 				
@@ -298,7 +303,8 @@ def read_labeled_data(filename):
 				word_tags = []
 	
 	return sentences, sent_tags
-					
+ 
+						
 
 def download_data():
     """ Download labeled data.
